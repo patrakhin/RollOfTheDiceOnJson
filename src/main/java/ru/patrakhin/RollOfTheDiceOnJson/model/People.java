@@ -9,7 +9,7 @@ import java.util.Random;
 @Table(name = "People")
 public class People {
 
-    private final Random random = new Random();
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,17 +21,20 @@ public class People {
     @Size(min = 2, max = 30, message = "Name should be between 2 and 30 characters")
     private String name;
 
-    @Column(name = "currentCell")
+    @Column(name = "current_cell")
     private int currentCell;
 
-    @Column(name = "firstDice")
+    @Column(name = "first_dice")
     private int firstDice;
 
-    @Column(name = "secondDice")
+    @Column(name = "second_dice")
     private int secondDice;
 
     @Column(name = "result")
     private int result;
+
+    @Column(name = "game_status")
+    private String gameStatus; //only for info
 
     public People() {
 
@@ -47,12 +50,25 @@ public class People {
     }
 
     public void rollDice() {
+        Random random = new Random();
         int firstNumberSided = random.nextInt(6) + 1;
         int secondNumberSided = random.nextInt(6) + 1;
         setFirstDice(firstNumberSided);
         setSecondDice(secondNumberSided);
-        setCurrentCell(getCurrentCell() + (firstNumberSided + secondNumberSided));
-        setResult(firstNumberSided + secondNumberSided);
+
+        int totalResult = firstNumberSided + secondNumberSided;
+        int newCell = getCurrentCell() + totalResult;
+
+        // Проверка на конец игры
+        if (newCell >= 48) {
+            newCell = 48;
+            setGameStatus("End of the game");
+        } else {
+            setGameStatus("Roll the dice");
+        }
+
+        setCurrentCell(newCell);
+        setResult(totalResult);
     }
 
 
@@ -102,5 +118,13 @@ public class People {
 
     public void setResult(int result) {
         this.result = result;
+    }
+
+    public String getGameStatus() {
+        return gameStatus;
+    }
+
+    public void setGameStatus(String gameStatus) {
+        this.gameStatus = gameStatus;
     }
 }
