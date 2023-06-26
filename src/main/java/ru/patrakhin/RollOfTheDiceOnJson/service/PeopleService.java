@@ -36,4 +36,9 @@ public class PeopleService {
         personRepository.save(people);
     }
 
+    @Transactional
+    public void delete(People people) {
+        personRepository.delete(people);
+    }
+
 }

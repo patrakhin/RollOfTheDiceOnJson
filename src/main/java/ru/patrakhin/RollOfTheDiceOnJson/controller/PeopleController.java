@@ -92,6 +92,17 @@ public class PeopleController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deletePerson(@PathVariable("id") int id) {
+        // Удаление персоны по id
+        People existingPerson = peopleService.findOne(id);
+        if (existingPerson == null) {
+            throw new PersonNotFoundException("Person with this id wasn't found!");
+        }
+        peopleService.delete(existingPerson);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
     @PostMapping("/{id}/roll-dice")
     public ResponseEntity<PersonDTO> rollDice(@PathVariable("id") int id) {
         // Бросок кубика и обновление данных персоны
