@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/people")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PeopleController {
     private final PeopleService peopleService;
     private final ModelMapper modelMapper;
@@ -49,7 +50,7 @@ public class PeopleController {
     }
 
 
-    @PostMapping
+/*    @PostMapping
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
         // Создание новой персоны
         if (bindingResult.hasErrors()) {
@@ -65,10 +66,35 @@ public class PeopleController {
         }
         People person = convertToPerson(personDTO);
         peopleService.save(person);
-        return ResponseEntity.ok(HttpStatus.OK);
+        //return ResponseEntity.ok(HttpStatus.OK);
+        PersonDTO createdPersonDTO = convertToPersonDTO(person);
+        //return ResponseEntity.ok(createdPersonDTO);
+        return createdPersonDTO;
+    }*/
+
+    @PostMapping
+    public PersonDTO create(@RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
+        // Создание новой персоны
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" - ")
+                        .append(error.getDefaultMessage())
+                        .append(";");
+            }
+            throw new PersonNotCreatedException(errorMsg.toString());
+        }
+        People person = convertToPerson(personDTO);
+        peopleService.save(person);
+        //return ResponseEntity.ok(HttpStatus.OK);
+        PersonDTO createdPersonDTO = convertToPersonDTO(person);
+        //return ResponseEntity.ok(createdPersonDTO);
+        return createdPersonDTO;
     }
 
-    @PutMapping("/{id}")
+/*    @PutMapping("/{id}")
     public ResponseEntity<HttpStatus> update(@PathVariable("id") int id, @RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
         // Обновление данных персоны по id
         if (bindingResult.hasErrors()) {
@@ -90,9 +116,33 @@ public class PeopleController {
         updatedPerson.setId(id);
         peopleService.save(updatedPerson);
         return ResponseEntity.ok(HttpStatus.OK);
+    }*/
+
+    @PutMapping("/{id}")
+    public PersonDTO update(@PathVariable("id") int id, @RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
+        // Обновление данных персоны по id
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" - ")
+                        .append(error.getDefaultMessage())
+                        .append(";");
+            }
+            throw new PersonNotCreatedException(errorMsg.toString());
+        }
+        People existingPerson = peopleService.findOne(id);
+        if (existingPerson == null) {
+            throw new PersonNotFoundException("Person with this id wasn't found!");
+        }
+        People updatedPerson = convertToPerson(personDTO);
+        updatedPerson.setId(id);
+        peopleService.save(updatedPerson);
+        return convertToPersonDTO(updatedPerson);
     }
 
-    @DeleteMapping("/{id}")
+/*    @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deletePerson(@PathVariable("id") int id) {
         // Удаление персоны по id
         People existingPerson = peopleService.findOne(id);
@@ -101,6 +151,17 @@ public class PeopleController {
         }
         peopleService.delete(existingPerson);
         return ResponseEntity.ok(HttpStatus.OK);
+    }*/
+
+    @DeleteMapping("/{id}")
+    public PersonDTO deletePerson(@PathVariable("id") int id) {
+        // Удаление персоны по id
+        People existingPerson = peopleService.findOne(id);
+        if (existingPerson == null) {
+            throw new PersonNotFoundException("Person with this id wasn't found!");
+        }
+        peopleService.delete(existingPerson);
+        return convertToPersonDTO(existingPerson);
     }
 
     @PostMapping("/{id}/roll-dice")
